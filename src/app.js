@@ -1,13 +1,17 @@
 const express = require("express");
+const { userAuth } = require("./middlewares/user");
 const app=express();
 
 
 
 
-app.get("/user",(req,res)=>{
-  console.log(req.query);
-  res.send("hello")
-  
+app.get("/user",userAuth,(req,res)=>{
+  try{
+    res.send("data send")
+
+  }catch(err){
+    res.status(400).send("error: "+err.message)
+  }
 })
 
 app.listen(3000,()=>{
