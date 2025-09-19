@@ -4,9 +4,11 @@ const { connectDB } = require("./config/database");
 const User = require("./models/user");
 const app=express();
 const jwt=require("jsonwebtoken")
+const cookieParser=require("cookie-parser")
 const bcrypt=require("bcrypt");
 const { validatesignup } = require("./utils/validatesignup");
 app.use(express.json())
+app.use(cookieParser())
 
 app.post("/signup",async(req,res)=>{
   try{
@@ -36,11 +38,14 @@ app.post("/login",async(req,res)=>{
       throw new Error("invalid credentials!.")
     }
     const isValidPassword=await bcrypt.compare(password,user.password);
-    if(!isValidPassword){
-      throw new Error("invalid credentials!.")
-    }
-
+    if(isValidPassword){
+    const token = await user.getJWT()
+    res.cookie("token",token);
     res.send("login successfull")
+    }else{
+       throw new Error("invalid credentials!.")
+    }
+   
 
   }catch(err){
     res.status(400).send("error :"+err.message)
@@ -48,8 +53,15 @@ app.post("/login",async(req,res)=>{
 })
 
 
+app.get("/user",userAuth,async(req,res)=>{
+  try{
+    const user=req.user;
+    res.send(user)
 
-
+  }catch(err){
+    res.status(400).send("error :"+err.message)
+  }
+})
 
 connectDB().then(()=>{
 console.log("databse Connected...");

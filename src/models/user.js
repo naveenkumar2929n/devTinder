@@ -1,4 +1,5 @@
 const mongoose=require("mongoose");
+const jwt=require("jsonwebtoken")
 const validator=require("validator")
 const userSchema=mongoose.Schema({
   firstName:{
@@ -42,5 +43,11 @@ throw new Error("invalid gender input")
   timestamps:true
 })
 
+
+userSchema.methods.getJWT=async function(){
+  const user=this
+const token=await jwt.sign({_id:user._id},"DEV@TINDER",{expiresIn:"7d"})
+return token
+}
 
 module.exports=mongoose.model("User",userSchema)
